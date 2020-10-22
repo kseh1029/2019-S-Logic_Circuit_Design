@@ -1,0 +1,429 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date:    15:10:37 06/16/2017 
+-- Design Name: 
+-- Module Name:    test_vm_mod - Behavioral 
+-- Project Name: 
+-- Target Devices: 
+-- Tool versions: 
+-- Description: 
+--
+-- Dependencies: 
+--
+-- Revision: 
+-- Revision 0.01 - File Created
+-- Additional Comments: 
+--
+----------------------------------------------------------------------------------
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx primitives in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+entity test_vm_mod is
+	port( mon50,mon100,mon500,mon1000,coffee_b,yulmu_b,return_b,reset_b,clk : in std_logic; --입력변수:50/100/500원 동전,커피/반환/리셋 버튼,clock
+			coffee_o,return_o,yulmu_o,mon50_o,mon100_o,mon500_o,mon1000_o : out std_logic );    --출력변수:커피/반환/리셋 출력버튼, 50/100/500 반환금액
+end test_vm_mod;
+
+architecture Behavioral of test_vm_mod is
+
+	type vendingmachine_type is (c0,c50,c100,c150,c200,c250,c300,c350,c400,c450,c500,c550,c600,c650,c700,c750,c800,c850,c900,c950,c1000); --최대금액:800원
+	signal machine : vendingmachine_type;
+	
+begin
+
+	process(mon50,mon100,mon500,mon1000,coffee_b,return_b,reset_b,clk)
+		variable m50,m100,m500,m1000,coffee : std_logic;
+	begin
+		if(reset_b = '1') then 							 --리셋 버튼이 눌려지면 
+		machine <= c0;        							 --초기화가 됨
+			elsif(clk'event and clk = '1') then 	 --clock이 rising엣지 상태가 되면 동작
+				case machine is	
+				
+					when c0 =>					      	 --machine 상태가 0원일때
+					
+						if(mon50 = '1') then       	 --50원을 넣으면  
+							machine <= c50;         	 --machine 상태는 50원
+						elsif(mon100 = '1') then   	 --100원을 넣으면
+							machine <= c100;        	 --machine 상태는 100원
+						elsif(mon500 = '1') then   	 --500원을 넣으면
+							machine <= c500;            --machine 상태는 500원
+						elsif(mon1000 = '1')then       --1000원을 넣으면
+							machine <= c1000;           --machine 상태는 1000원
+						else 									 --그렇지 않으면
+							machine <= c0;          	 --machine 상태는 0원
+						end if;
+					
+					when c50 =>								 --machine 상태가 50원일때
+					
+						if(return_b = '1') then			 --반환 버튼을 누르면
+							m50 := '1';						 --50원이 반환
+							machine <= c0; 				 --machine 상태는 0원
+					
+						else
+							if(mon50 = '1') then        --50원을 넣으면
+								machine <= c100;			 --machine 상태는 100원
+							elsif(mon100 = '1') then    --100원을 넣으면
+								machine <= c150;			 --machine 상태는 150원
+							elsif(mon500 = '1') then    --500원을 넣으면
+								machine <= c550;			 --machine 상태는 550원
+                     elsif(mon1000 = '1')then    --1000원을 넣으면
+								m1000 := '1';            --1000원을 자동반환하고 
+								machine <= c50;          --machine 상태는 50원
+								else								 --그렇지 않으면
+								machine <= c50;			 --machine 상태는 50원
+							
+							end if;
+						end if;
+					
+					when c100 =>							 --machine 상태가 100원일때
+					
+						if(return_b = '1') then			 --반환버튼을 누르면
+							m100 := '1';					 --100원이 반환
+							machine <= c0;					 --machine 상태는 0원
+						
+						else
+							if(mon50 = '1') then        --50원을 넣으면
+								machine <= c150;			 --machine 상태는 150원
+							elsif(mon100 = '1') then    --100원을 넣으면
+								machine <= c200;			 --machine 상태는 200원
+							elsif(mon500 = '1') then	 --500원을 넣으면
+								machine <= c600;			 --machine 상태는 600원
+							elsif(mon1000 = '1')then    --1000원을 넣으면
+								m1000 := '1';            --1000원을 자동반환하고 
+								machine <= c100;          --machine 상태는 100원
+							else							    --그렇지 않으면
+								machine <= c100;			 --machine 상태는 100원
+							
+							end if;
+						end if;
+					
+					when c150 =>							 --machine 상태가 150원일때
+					
+						if(return_b = '1') then			 --반환버튼을 누르면
+							m100 := '1';					 --100원이 반환
+							machine <= c50;				 --machine 상태는 50원
+						
+						else
+							if(mon50 = '1') then  		 --50원을 넣으면
+								machine <= c200;			 --machine 상태는 200원
+							elsif(mon100 = '1') then	 --100원을 넣으면
+								machine <= c250;			 --machine 상태는 250원
+							elsif(mon500 = '1') then	 --500원을 넣으면
+								machine <= c650;			 --machine 상태는 650원
+							else								 --그렇지 않으면
+								machine <= c150;			 --machine 상태는 150원
+							
+							end if;
+						end if;
+					
+					when c200 =>							 --machine 상태가 200원일때
+					
+						if(return_b = '1') then			 --반환버튼을 누르면 
+						m100 := '1';						 --100원이 반환
+							machine <= c100;				 --machine 상태는 100원
+						
+						else						
+							if(mon50 = '1') then			 --50원을 넣으면
+								machine <= c250;			 --machine 상태는 250원
+							elsif(mon100 = '1') then	 --100원을 넣으면
+								machine <= c300;			 --machine 상태는 300원
+							elsif(mon500 = '1') then	 --500원을 넣으면
+								machine <= c700;			 --machine 상태는 700원
+							else								 --그렇지 않으면
+								machine <= c200;			 --machine 상태는 200원
+							
+							end if;
+						end if;
+					
+					when c250 =>							--machine 상태가 250원일때
+					
+						if(return_b = '1') then			--반환버튼을 누르면
+							m100 := '1';				 	--100원이 반환
+							machine <= c150;				--machine 상태는 150원
+						
+						else
+							if(mon50 = '1') then		 	--50원을 넣으면
+								machine <= c300;			--machine 상태는 300원
+							elsif(mon100 = '1') then	--100원을 넣으면
+								machine <= c350;			--machine 상태는 350원
+							elsif(mon500 = '1') then	--500원을 넣으면
+								machine <= c750;			--machine 상태는 750원
+							else								--그렇지 않으면
+								machine <= c250;			--machine 상태는 250원
+							
+							end if;
+						end if;
+					
+					when c300 =>							--machine 상태가 300원일때
+					
+						if(return_b = '1') then			--반환버튼을 누르면
+							m100 := '1';					--100원이 반환
+							machine <= c200;				--machine 상태는 200원
+						
+						else
+							if(mon50 = '1') then			--50원을 넣으면
+								machine <= c350;			--machine 상태는 350원
+							elsif(mon100 = '1') then	--100원을 넣으면
+								machine <= c400;			--machine 상태는 400원
+							elsif(mon500 = '1') then	--500원을 넣으면
+								machine <= c800;			--machine 상태는 800원
+							else								--그렇지 않으면
+								machine <= c300;			--machine 상태는 300원
+							
+							end if;
+						end if;
+					
+					when c350 => 							--machine 상태가 350원일때
+					
+						if(return_b = '1') then			--반환버튼을 누르면
+							m100 := '1';					--100원이 반환
+							machine <= c250;				--machine 상태는 250원
+							
+						elsif(coffee_b = '1') then		--커피버튼을 누르면
+							coffee := '1';					--커피가 나옴
+							machine <= c0;					--machine 상태는 0원
+						
+						else						
+							if(mon50 = '1') then			--50원을 넣으면
+								machine <= c400;			--machine 상태는 400원
+							elsif(mon100 = '1') then	--100원을 넣으면
+								machine <= c450;			--machine 상태는 450원
+							elsif(mon500 = '1') then	--500원을 넣으면
+								machine <= c350;			--machine 상태는 350원
+								m500 := '1';				--500원이 반환
+							else								--그렇지 않으면
+								machine <= c350;			--machine 상태는 350원
+							
+							end if;
+						end if;
+					
+					when c400 =>							--machine 상태가 400원일때
+					
+						if(return_b = '1') then			--반환버튼을 누르면
+							m100 := '1';					--100원이 반환
+							machine <= c300;				--machine 상태는 300원
+							
+						elsif(coffee_b = '1') then		--커피버튼을 누르면
+							coffee := '1';					--커피가 나옴
+							machine <= c50;				--machine 상태는 50원
+						
+						else
+							if(mon50 = '1') then			--50원을 넣으면
+								machine <= c450;			--machine 상태는 450원
+							elsif(mon100 = '1') then	--100원을 넣으면
+								machine <= c500;			--machine 상태는 500원
+							elsif(mon500 = '1') then	--500원을 넣으면
+								machine <= c400;			--machine 상태는 400원
+								m500 := '1';				--500원이 반환
+							else								--그렇지 않으면
+								machine <= c400;			--machine 상태는 400원
+							
+							end if;
+						end if;
+					
+					when c450 =>							--machine 상태가 450원일때
+					
+						if(return_b = '1') then			--반환버튼을 누르면
+							m100 := '1';					--100원이 반환
+							machine <= c350;				--machine 상태는 350원
+							
+						elsif(coffee_b = '1') then		--커피버튼을 누르면
+							coffee := '1';					--커피가 나옴
+							machine <= c100;				--machine 상태는 100원
+							
+						else
+							if(mon50 = '1') then			--50원을 넣으면
+								machine <= c500;			--machine 상태는 500원
+							elsif(mon100 = '1') then	--100원을 넣으면
+								machine <= c550;			--machine 상태는 550원
+							elsif(mon500 = '1') then	--500원을 넣으면
+								machine <= c450;			--machine 상태는 450원
+								m500 := '1';				--500원이 반환
+							else								--그렇지 않으면
+								machine <= c450;			--machine 상태는 450원
+							
+							end if;
+						end if;
+							
+					when c500 =>							--machine 상태가 500원일때
+					
+						if(return_b = '1') then			--반환버튼을 누르면
+							m500 := '1';					--500원이 반환
+							machine <= c0;					--machine 상태는 0원
+							
+						elsif(coffee_b = '1') then		--커피버튼을 누르면
+							coffee := '1';					--커피가 나옴
+							machine <= c150;				--machine 상태는 150원
+						
+						else	
+							if(mon50 = '1') then			--50원을 넣으면
+								machine <= c550;			--machine 상태는 550원
+							elsif(mon100 = '1') then	--100원을 넣으면
+								machine <= c600;			--machine 상태는 600원
+							elsif(mon500 = '1') then	--500원을 넣으면
+								machine <= c500;			--machine 상태는 500원
+								m500 := '1';				--500원이 반환
+							else								--그렇지 않으면
+								machine <= c500;			--machine 상태는 500원
+							
+							end if;
+						end if;
+						
+					when c550 =>							--machine 상태가 550원일때
+					
+						if(return_b = '1') then			--반환버튼을 누르면
+							m500 := '1';					--500원이 반환
+							machine <= c50;				--machine 상태는 50원
+							
+						elsif(coffee_b ='1') then		--커피버튼을 누르면
+							coffee := '1';					--커피가 나옴
+							machine <= c200;				--machine 상태는 200원
+						
+						else
+							if(mon50 = '1') then			--50원을 넣으면
+								machine <= c600;			--machine 상태는 600원
+							elsif(mon100 = '1') then	--100원을 넣으면
+								machine <= c650;			--machine 상태는 650원
+							elsif(mon500 = '1') then	--500원을 넣으면
+								machine <= c550;			--machine 상태는 550원
+								m500 := '1';				--500원이 반환
+							else								--그렇지 않으면
+								machine <= c550;			--machine 상태는 550원
+							
+							end if;
+						end if;
+							
+					when c600 =>							--machine 상태가 600원일때
+											
+						if(return_b = '1') then			--반환버튼을 누르면
+							m500 := '1';					--500원이 반환
+							machine <= c100;				--machine 상태는 100원
+							
+						elsif(coffee_b = '1') then		--커피버튼을 누르면
+							coffee := '1';					--커피가 나옴
+							machine <= c250;				--machine 상태는 250원
+						
+						else
+							if(mon50 = '1') then			--50원을 넣으면
+								machine <= c650;			--machine 상태는 650원
+							elsif(mon100 = '1') then	--100원을 넣으면
+								machine <= c700;			--machine 상태는 700원
+							elsif(mon500 = '1') then	--500원을 넣으면
+								machine <= c600;			--machine 상태는 600원
+								m500 := '1';				--500원이 반환
+							else								--그렇지 않으면
+								machine <= c600;			--machine 상태는 600원
+								
+							end if;
+						end if;
+							
+					when c650 =>							--machine 상태가 650원일때
+						
+						if(return_b = '1') then			--반환버튼을 누르면
+							m500 := '1';					--500원이 반환
+							machine <= c150;				--machine 상태는 150원
+							
+						elsif(coffee_b = '1') then		--커피버튼을 누르면
+							coffee := '1';					--커피가 나옴
+							machine <= c300;				--machine 상태는 300원
+						
+						else
+							if(mon50 = '1') then			--50원을 넣으면
+								machine <= c700;			--machine 상태는 700원
+							elsif(mon100 = '1') then	--100원을 넣으면
+								machine <= c750;			--machine 상태는 750원
+							elsif(mon500 = '1') then	--500원을 넣으면
+								machine <= c650;			--machine 상태는 650원
+								m500 := '1';				--500원이 반환
+							else								--그렇지 않으면
+								machine <= c650;			--machine 상태는 650원
+							
+							end if;
+						end if;
+					
+					when c700 =>							--machine 상태가 700원일때
+											
+						if(return_b = '1') then			--반환버튼을 누르면
+							m500 := '1';					--500원이 반환
+							machine <= c200;				--machine 상태는 200원
+							
+						elsif(coffee_b = '1') then		--커피버튼을 누르면
+							coffee := '1';					--커피가 나옴
+							machine <= c350;				--machine 상태는 350원
+						
+						else
+							if(mon50 = '1') then			--50원을 넣으면
+								machine <= c750;			--machine 상태는 750원
+							elsif(mon100 = '1') then	--100원을 넣으면
+								machine <= c800;			--machine 상태는 800원
+							elsif(mon500 = '1') then	--500원을 넣으면
+								machine <= c700;			--machine 상태는 700원
+								m500 := '1';				--500원이 반환
+							else								--그렇지 않으면
+								machine <= c700;			--machine 상태는 700원
+							
+							end if;
+						end if;
+						
+					when c750 =>							--machine 상태가 750원일때
+					
+						if(return_b = '1') then			--반환버튼을 누르면
+							m500 := '1';					--500원이 반환
+							machine <= c250;				--machine 상태는 250원
+							
+						elsif(coffee_b = '1') then		--커피버튼을 누르면
+							coffee := '1';					--커피가 나옴
+							machine <= c400;				--machine 상태는 400원
+						
+						else
+							if(mon50 = '1') then			--50원을 넣으면
+								machine <= c800;			--machine 상태는 800원
+							elsif(mon100 = '1') then	--100원을 넣으면
+								machine <= c750;			--machine 상태는 750원
+								m100 := '1';				--100원이 반환
+							elsif(mon500 = '1') then	--500원을 넣으면
+								machine <= c750;			--machine 상태는 750원
+								m500 := '1';				--500원이 반환
+							else								--그렇지 않으면
+								machine <= c750;			--machine 상태는 750원
+							
+							end if;
+						end if;
+						
+					when c800 =>							--machine 상태가 800원일때
+												
+						if(return_b = '1') then			--반환버튼을 누르면
+							m500 := '1';					--500원이 반환
+							machine <= c300;				--machine 상태는 300원
+							
+						elsif(coffee_b = '1') then		--커피버튼을 누르면
+							coffee := '1';					--커피가 나옴
+							machine <= c450;				--machine 상태는 450원
+						
+						else									--그렇지 않으면
+							machine <= c800;				--machine 상태는 800원
+						
+						end if;
+					
+					end case;
+				end if;
+				
+				
+		mon50_o <= m50;			--variable 변수를 출력변수에 넣음
+		mon100_o <= m100;
+		mon500_o <= m500;
+		coffee_o <= coffee;
+
+	end process;
+		
+end Behavioral;
